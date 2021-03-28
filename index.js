@@ -1,36 +1,20 @@
-import { throws } from 'assert';
-import express from 'express';
-const app = express();
-import { appendFile, read, readFile, write, writeFile } from 'fs';
+const fs = require("fs").promises;
 
-const port = 3000;
+createFiles();
 
-let states = [];
-let cities = [];
+async function createFiles() {
+  let data = await fs.readFile('./jsonFiles/Estados.json');
+  const states = JSON.parse(data);
+  
+  data = await fs.readFile('./jsonFiles/Cidades.json');
+  const cities = JSON.parse(data);
 
-async function readAndCreate() {
-  await readCities();
-  await readStates();
+  for (state of states) {
+    const stateCities = cities.filter(city => city.Estado === state.ID)
+    await fs.writeFile(`./createdFiles/${state.Sigla}.json`, JSON.stringify(stateCities));
+  }
+
   console.log(states);
   console.log(cities);
 }
 
-async function readCities () {
-  readFile('./jsonFiles/Cidades.json', (err, data) => {
-    if (err) throw err;
-    cities =  JSON.parse(data);
-  });
-}
-
-async function readStates() {
-  readFile('./jsonFiles/Estados.json', (err, data) => {
-    if (err) throw err;
-    states = await JSON.parse(data);
-  });
-}
-
-app.listen(port, () => {
-  console.log (`Example app listening at http://localhost:${port}`);
-})
-
-readAndCreate();
