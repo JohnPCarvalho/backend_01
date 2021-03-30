@@ -1,6 +1,11 @@
 const fs = require("fs").promises;
 
-createFiles();
+init();
+
+async function init() {
+  await createFiles();
+  await getStatesWithMoreCities();
+}
 
 async function createFiles() {
   let data = await fs.readFile('./jsonFiles/Estados.json');
@@ -13,8 +18,32 @@ async function createFiles() {
     const stateCities = cities.filter(city => city.Estado === state.ID)
     await fs.writeFile(`./createdFiles/${state.Sigla}.json`, JSON.stringify(stateCities));
   }
-
-  console.log(states);
-  console.log(cities);
 }
 
+async function getCitiesCount(uf) {
+  let data = await fs.readFile(`./createdFiles/${uf}.json`);
+  const cities = JSON.parse(data);
+  return cities.length;
+}
+
+async function getStatesWithMoreCities() {
+  const states = JSON.parse(await fs.readFile("./jsonFiles/Estados.json"));
+  const list = [];
+
+  for (state of states) {
+    const count = await getCitiesCount(state.Sigla);
+    list.push({uf: state.Sigla, count: count});
+  }
+
+  list.sort((a, b) => {
+    if (a.count < b.count) return 1;
+    else if (a.count > b.count) return -1;
+    else return 0;
+  })
+
+  const result = [];
+
+  list.slice(0, 5).forEach(item => result.push(item.uf + " - " + item.count));
+
+  console.log(result)
+}
