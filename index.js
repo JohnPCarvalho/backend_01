@@ -6,6 +6,9 @@ async function init() {
   await createFiles();
   await getStatesWithMoreOrLessCities(true);
   await getStatesWithMoreOrLessCities(false);
+  await getBiggerNameCities();
+
+  console.log(await getBiggerName("MG"));
 }
 
 async function createFiles() {
@@ -52,4 +55,30 @@ async function getStatesWithMoreOrLessCities(more) {
   
 
   console.log(result)
+}
+
+async function getBiggerNameCities() {
+  const states = JSON.parse(await fs.readFile("./jsonFiles/Estados.json"));
+  const result = [];
+  for (state of states) {
+    const city = await getBiggerName(state.Sigla)
+    result.push(city.Nome + " - " + state.Sigla);
+  }
+  console.log(result);
+}
+
+async function getBiggerName(uf) {
+  const cities = JSON.parse(await fs.readFile(`./createdFiles/${uf}.json`));
+  
+  let result;
+
+  cities.forEach(city => {
+    if (!result) 
+      result = city;
+      else if (city.Nome.length > result.Nome.length)
+        result = city;
+        else if ((city.Nome.length === result.Nome.length) && (city.Nome.toLowerCase() < result.Nome.toLowerCase()))
+        result = city;
+  });
+  return result;
 }
