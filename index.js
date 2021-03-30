@@ -4,7 +4,8 @@ init();
 
 async function init() {
   await createFiles();
-  await getStatesWithMoreCities();
+  await getStatesWithMoreOrLessCities(true);
+  await getStatesWithMoreOrLessCities(false);
 }
 
 async function createFiles() {
@@ -26,7 +27,7 @@ async function getCitiesCount(uf) {
   return cities.length;
 }
 
-async function getStatesWithMoreCities() {
+async function getStatesWithMoreOrLessCities(more) {
   const states = JSON.parse(await fs.readFile("./jsonFiles/Estados.json"));
   const list = [];
 
@@ -43,7 +44,12 @@ async function getStatesWithMoreCities() {
 
   const result = [];
 
-  list.slice(0, 5).forEach(item => result.push(item.uf + " - " + item.count));
+  if (more) {
+    list.slice(0, 5).forEach(item => result.push(item.uf + " - " + item.count));
+  } else {
+    list.slice(-5).forEach(item => result.push(item.uf + " - " + item.count));
+  }
+  
 
   console.log(result)
 }
