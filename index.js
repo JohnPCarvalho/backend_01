@@ -3,11 +3,12 @@ const fs = require("fs").promises;
 init();
 
 async function init() {
-  //await createFiles();
-  //await getStatesWithMoreOrLessCities(true);
-  //await getStatesWithMoreOrLessCities(false);
+  await createFiles();
+  await getStatesWithMoreOrLessCities(true);
+  await getStatesWithMoreOrLessCities(false);
   await getBiggerOrSmallerNameCities(false);
-
+  await getBiggerOrSmallerCityName(true);
+  await getBiggerOrSmallerCityName(false);
 }
 
 async function createFiles() {
@@ -101,4 +102,31 @@ async function getSmallerName(uf) {
         result = city;
   });
   return result;
+}
+
+async function getBiggerOrSmallerCityName(bigger) {
+  const states = JSON.parse(await fs.readFile("./jsonFiles/Estados.json"));
+  const list = [];
+
+  for (state of states) {
+    let city;
+    if (bigger) {
+      city = await getBiggerName(state.Sigla);
+    } else {
+      city = await getSmallerName(state.Sigla);
+    }
+    list.push({name: city.Nome, uf: state.Sigla});
+  }
+  const result = list.reduce((prev, current) => {
+    if (bigger) {
+      if (prev.name.length > current.name.length) return prev;
+      else if (prev.name.length < current.name.length) return current;
+      else return prev.name.toLowerCase() < current.name.toLowerCase() ? prev : current;
+    } else {
+      if (prev.name.length < current.name.length) return prev;
+      else if (prev.name.length > current.name.length) return current;
+      else return prev.name.toLowerCase() < current.name.toLowerCase() ? prev : current;
+    }
+  })
+  console.log(result.name + " - " + result.uf);
 }
